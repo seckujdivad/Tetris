@@ -9,6 +9,7 @@ class fonts: #unified fonts/formatting. please use
     face = ''
     title = (face, 50)
     large = (face, 25)
+    normal = (face, 14)
     #formatting
     relief = tk.FLAT
     overrelief = tk.GROOVE
@@ -147,12 +148,18 @@ class apply_piece:
             active_piece.orientation = active_piece.rotations[index]
             render()
 
+for sub in os.listdir('subsystems'): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
+    file = open('subsystems/' + sub, 'r')
+    fc = file.read()
+    file.close()
+    exec(fc)
+
 class start_menu:
     menu_width = 15
     frame = tk.Frame(root)
     title = tk.Label(frame, text='Tetris', font=fonts.title)
     play_game = tk.Button(frame, text='Play', font=fonts.large, width=menu_width, command=play, relief=fonts.relief, overrelief=fonts.overrelief)
-    leaderboard = tk.Button(frame, text='Leaderboard', font=fonts.large, width=menu_width, relief=fonts.relief, overrelief=fonts.overrelief)
+    leaderboard = tk.Button(frame, text='Leaderboard', font=fonts.large, width=menu_width, relief=fonts.relief, overrelief=fonts.overrelief, command=leaderboard.show_leaderboard)
     #
     title.pack(fill=tk.X)
     play_game.pack(fill=tk.X)
