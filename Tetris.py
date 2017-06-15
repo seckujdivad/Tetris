@@ -22,7 +22,7 @@ class block:
             img = images[random.choice(os.listdir('blocks'))]
         else:
             img = colour
-        self.obj = canvas.create_image(0, 0, image=img)
+        self.obj = canvas.create_image(-10, -10, image=img) #coords are deliberately offscreen so that they aren't blinking as much in the top corner
         self.active = active
     obj = None
     last_render_coords = None
@@ -46,7 +46,7 @@ class piece:
     rotations = ['up', 'right', 'down', 'left']
     coords = [5, 30]
     models = {}
-    image = None
+    image = None #use the same image resource for all the blocks
 
 #####
 
@@ -102,16 +102,19 @@ class render: #uses oop because...
             for index in range(len(screen_blocks)):
                 render_block(index)
             self.active = False
-render = render().render #im giving up on life right now... who cares? if it works it works *breaks*
+render = render().render #im giving up on life right now... who cares? if it works, it works *breaks*
 
 def send_piece_to_blocks(piece):
     model = piece.models[piece.orientation]
     start_index = piece.coords[0] + (piece.coords[1] * 10)
+    all_index = []
     for i in range(len(model)):
         char = model[i]
         if char == '1':
-            index = int((start_index + (i % piece.linelen) - int(i / piece.linelen)) % len(screen_blocks))
+            index = int((start_index + (i % piece.linelen) - int(i / piece.linelen) * 10) % len(screen_blocks))
+            all_index.append(index)
             screen_blocks[index] = block(colour=piece.image, active=True)
+    print(*all_index)
 
 class apply_piece:
     class move:
@@ -130,6 +133,7 @@ class apply_piece:
             if index < 0:
                 index = len(active_piece.rotations) - 1
             active_piece.orientation = active_piece.rotations[index]
+            print(active_piece.orientation)
             render()
         def right(event):
             print('rr')
@@ -137,6 +141,7 @@ class apply_piece:
             if index > len(active_piece.rotations) - 1:
                 index = 0
             active_piece.orientation = active_piece.rotations[index]
+            print(active_piece.orientation)
             render()
 
 class start_menu:
