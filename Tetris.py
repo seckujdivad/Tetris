@@ -5,18 +5,22 @@ import os, time, random, math, threading
 root = tk.Tk()
 root.title('Tetris')
 
-class fonts:
+class fonts: #unified fonts/formatting. please use
     face = ''
     title = (face, 50)
     large = (face, 25)
+    #formatting
+    relief = tk.FLAT
+    overrelief = tk.GROOVE
 
+#load all the images into memory at the same time instead of loading once each time they are needed
 images = {}
 for f in os.listdir('blocks'):
     images[f] = tk.PhotoImage(file='blocks/' + f)
 
 #####
 
-class block:
+class block: #the blocks that everything is made from - "the building blocks of life"
     def __init__(self, colour='random', active=False):
         if colour == 'random':
             img = images[random.choice(os.listdir('blocks'))]
@@ -28,7 +32,7 @@ class block:
     last_render_coords = None
     active = None
 
-class piece:
+class piece: #the shape you move down the screen
     def __init__(self):
         self.id = random.choice(os.listdir('models'))
         self.image = images[random.choice(os.listdir('blocks'))]
@@ -61,7 +65,7 @@ class piece:
 #####
 
 screen_blocks = []
-for x in range(10 * 30):
+for x in range(10 * 30): #add blank spaces to screen so that they can be replaced by blocks
     screen_blocks.append(None)
 def play():
     global canvas
@@ -76,7 +80,7 @@ def play():
     root.bind('<q>', apply_piece.rotate.left)
     root.bind('<e>', apply_piece.rotate.right)
 
-def render_loop():
+def render_loop(): #rerender and move down on a timer
     global active_piece
     active_piece = piece()
     while True:
@@ -84,19 +88,17 @@ def render_loop():
         time.sleep(0.3)
         active_piece.coords[1] -= 1
 
-def render_block(index):
+def render_block(index): #render from a specific index
     global screen_blocks
     b = screen_blocks[index]
     if not b == None:
         xcoord = (index % 10) * 20 + 11
         ycoord = (20 * 30) - ((int(index / 10) * 20) + 10)
-        if b.last_render_coords == [xcoord, ycoord]:
-            pass
-        else:
+        if not b.last_render_coords == [xcoord, ycoord]: #optimised rerender render skipping
             canvas.coords(b.obj, xcoord, ycoord)
             b.last_render_coords = [xcoord, ycoord]
 
-class render: #uses oop because...
+class render: #uses objects because ... ... ... meh
     def __init__(self):
         self.active = False
     def render(self):
@@ -149,8 +151,8 @@ class start_menu:
     menu_width = 15
     frame = tk.Frame(root)
     title = tk.Label(frame, text='Tetris', font=fonts.title)
-    play_game = tk.Button(frame, text='Play', font=fonts.large, width=menu_width, command=play)
-    leaderboard = tk.Button(frame, text='Leaderboard', font=fonts.large, width=menu_width)
+    play_game = tk.Button(frame, text='Play', font=fonts.large, width=menu_width, command=play, relief=fonts.relief, overrelief=fonts.overrelief)
+    leaderboard = tk.Button(frame, text='Leaderboard', font=fonts.large, width=menu_width, relief=fonts.relief, overrelief=fonts.overrelief)
     #
     title.pack(fill=tk.X)
     play_game.pack(fill=tk.X)
