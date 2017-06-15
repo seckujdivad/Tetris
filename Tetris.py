@@ -43,8 +43,18 @@ class piece:
             self.models[model[:len(model) - 4]] = final_model
             file.close()
         self.linelen = math.sqrt(len(self.models[self.orientation]))
+    def check_sides_ok(self):
+        rows_occupied = []
+        for b in self.models[self.orientation]:
+            if b == '1':
+                row = ''
+                if not row in rows_occupied:
+                    rows_occupied.append(row)
+        if len(rows_occupied) == 1:
+            return True
+        return False
     rotations = ['up', 'right', 'down', 'left']
-    coords = [5, 30]
+    coords = [5, 29]
     models = {}
     image = None #use the same image resource for all the blocks
 
@@ -71,7 +81,7 @@ def render_loop():
     active_piece = piece()
     while True:
         render()
-        time.sleep(1)
+        time.sleep(0.3)
         active_piece.coords[1] -= 1
 
 def render_block(index):
@@ -107,41 +117,32 @@ render = render().render #im giving up on life right now... who cares? if it wor
 def send_piece_to_blocks(piece):
     model = piece.models[piece.orientation]
     start_index = piece.coords[0] + (piece.coords[1] * 10)
-    all_index = []
     for i in range(len(model)):
         char = model[i]
         if char == '1':
             index = int((start_index + (i % piece.linelen) - int(i / piece.linelen) * 10) % len(screen_blocks))
-            all_index.append(index)
             screen_blocks[index] = block(colour=piece.image, active=True)
-    print(*all_index)
 
 class apply_piece:
     class move:
         def left(event):
-            print('ml')
             active_piece.coords[0] -= 1
             render()
         def right(event):
-            print('mr')
             active_piece.coords[0] += 1
             render()
     class rotate:
         def left(event):
-            print('rl')
             index = active_piece.rotations.index(active_piece.orientation) - 1
             if index < 0:
                 index = len(active_piece.rotations) - 1
             active_piece.orientation = active_piece.rotations[index]
-            print(active_piece.orientation)
             render()
         def right(event):
-            print('rr')
             index = active_piece.rotations.index(active_piece.orientation) + 1
             if index > len(active_piece.rotations) - 1:
                 index = 0
             active_piece.orientation = active_piece.rotations[index]
-            print(active_piece.orientation)
             render()
 
 class start_menu:
