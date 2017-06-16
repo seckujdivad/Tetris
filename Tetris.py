@@ -49,17 +49,36 @@ class piece: #the shape you move down the screen
             file.close()
         self.linelen = math.sqrt(len(self.models[self.orientation]))
     def check_sides_ok(self):
+        num_lines = []
+        sum_index = 0
+        for index in range(len(self.models[self.orientation])):
+            char = self.models[self.orientation][index]
+            if char == '1':
+                if not int(index / self.linelen) in num_lines:
+                    num_lines.append(int(index / self.linelen))
         rows_occupied = []
-        for b in self.models[self.orientation]:
-            if b == '1':
-                row = ''
-                if not row in rows_occupied:
-                    rows_occupied.append(row)
-        if len(rows_occupied) == 1:
+        for index in range(len(screen_blocks)):
+            b = screen_blocks[index]
+            if not b == None:
+                if b.active:
+                    row = int(index / 10)
+                    print(index, row)
+                    if not row in rows_occupied:
+                        rows_occupied.append(row)
+        print('Occupied:', len(rows_occupied), 'Model:', len(num_lines))
+        if len(rows_occupied) == len(num_lines):
             return True
         return False
+    def get_high_low_x(self):
+        indexes = []
+        for index in range(len(screen_blocks)):
+            b = screen_blocks[index]
+            if not b == None:
+                if b.active:
+                    indexes.append(int(index % 10))
+        return indexes[0], indexes[len(indexes) - 1]
     rotations = ['up', 'right', 'down', 'left']
-    coords = [5, 29]
+    coords = [3, 27]
     models = {}
     image = None #use the same image resource for all the blocks
 
@@ -127,13 +146,26 @@ def send_piece_to_blocks(piece):
             screen_blocks[index] = block(colour=piece.image, active=True)
 
 class apply_piece:
+    running = False
     class move:
         def left(event):
-            active_piece.coords[0] -= 1
-            render()
+            global apply_piece
+            if not apply_piece.running:
+                apply_piece.running = True
+                active_piece.coords[0] -= 1
+                render()
+                high, low = active_piece.get_high_low_x()
+                if high == 9:
+                    active_piece.coords[0] += 1
+                    render()
+                apply_piece.running = False
         def right(event):
             active_piece.coords[0] += 1
             render()
+            high, low = active_piece.get_high_low_x()
+            if low == 0:
+                active_piece.coords[0] -= 1
+                render()
     class rotate:
         def left(event):
             index = active_piece.rotations.index(active_piece.orientation) - 1
