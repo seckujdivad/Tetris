@@ -173,12 +173,24 @@ class apply_piece:
                 index = len(active_piece.rotations) - 1
             active_piece.orientation = active_piece.rotations[index]
             render()
+            if not active_piece.check_sides_ok():
+                index = active_piece.rotations.index(active_piece.orientation) + 1
+                if index > len(active_piece.rotations) - 1:
+                    index = 0
+                active_piece.orientation = active_piece.rotations[index]
+                render()
         def right(event):
             index = active_piece.rotations.index(active_piece.orientation) + 1
             if index > len(active_piece.rotations) - 1:
                 index = 0
             active_piece.orientation = active_piece.rotations[index]
             render()
+            if not active_piece.check_sides_ok():
+                index = active_piece.rotations.index(active_piece.orientation) - 1
+                if index < 0:
+                    index = len(active_piece.rotations) - 1
+                active_piece.orientation = active_piece.rotations[index]
+                render()
 
 for sub in os.listdir('subsystems'): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
     file = open('subsystems/' + sub, 'r')
