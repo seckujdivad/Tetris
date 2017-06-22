@@ -110,16 +110,6 @@ def render_loop(): #rerender and move down on a timer
         time.sleep(0.3)
         active_piece.coords[1] -= 1
 
-def render_block_from_index(index): #render from a specific index
-    global screen_blocks
-    b = screen_blocks[index]
-    if not b == None:
-        xcoord = (index % 10) * 20 + 11
-        ycoord = (20 * 30) - ((int(index / 10) * 20) + 10)
-        if not b.last_render_coords == [xcoord, ycoord]: #optimised rerender render skipping
-            canvas.coords(b.obj, xcoord, ycoord)
-            b.last_render_coords = [xcoord, ycoord]
-
 class render: #uses objects because ... ... ... meh
     def __init__(self):
         self.active = False
@@ -150,75 +140,6 @@ class render: #uses objects because ... ... ... meh
             self.rendering = False
     rendering = False
 render = render()
-
-def send_piece_to_blocks(piece, block_active=True):
-    model = piece.models[piece.orientation]
-    start_index = piece.coords[0] + (piece.coords[1] * 10)
-    return_clip = False
-    for i in range(len(model)):
-        char = model[i]
-        if char == '1':
-            index = int((start_index + (i % piece.linelen) - int(i / piece.linelen) * 10) % len(screen_blocks))
-            if type(screen_blocks[index]) == block:
-                return_clip = True
-            screen_blocks[index] = block(colour=piece.image, active=block_active)
-    return return_clip
-
-class apply_piece:
-    running = False
-    class move:
-        def left(event):
-            global apply_piece
-            if not apply_piece.running and not render.rendering:
-                apply_piece.running = True
-                active_piece.coords[0] -= 1
-                render.render()
-                high, low = active_piece.get_high_low_x()
-                if high == 9:
-                    active_piece.coords[0] += 1
-                    render.render()
-                apply_piece.running = False
-        def right(event):
-            if not apply_piece.running and not render.rendering:
-                apply_piece.running = True
-                active_piece.coords[0] += 1
-                render.render()
-                high, low = active_piece.get_high_low_x()
-                if low == 0:
-                    active_piece.coords[0] -= 1
-                    render.render()
-                apply_piece.running = False
-    class rotate:
-        def left(event):
-            if not apply_piece.running and not render.rendering:
-                apply_piece.running = True
-                index = active_piece.rotations.index(active_piece.orientation) - 1
-                if index < 0:
-                    index = len(active_piece.rotations) - 1
-                active_piece.orientation = active_piece.rotations[index]
-                render.render()
-                if not active_piece.check_sides_ok():
-                    index = active_piece.rotations.index(active_piece.orientation) + 1
-                    if index > len(active_piece.rotations) - 1:
-                        index = 0
-                    active_piece.orientation = active_piece.rotations[index]
-                    render.render()
-                apply_piece.running = False
-        def right(event):
-            if not apply_piece.running and not render.rendering:
-                apply_piece.running = True
-                index = active_piece.rotations.index(active_piece.orientation) + 1
-                if index > len(active_piece.rotations) - 1:
-                    index = 0
-                active_piece.orientation = active_piece.rotations[index]
-                render.render()
-                if not active_piece.check_sides_ok():
-                    index = active_piece.rotations.index(active_piece.orientation) - 1
-                    if index < 0:
-                        index = len(active_piece.rotations) - 1
-                    active_piece.orientation = active_piece.rotations[index]
-                    render.render()
-                apply_piece.running = False
 
 for sub in os.listdir('subsystems'): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
     file = open('subsystems/' + sub, 'r')
