@@ -34,7 +34,8 @@ class block: #the blocks that everything is made from - "the building blocks of 
     active = None
 
 class piece: #the shape you move down the screen
-    def __init__(self):
+    def __init__(self, coords=[3, 20]):
+        self.coords = coords
         self.id = random.choice(os.listdir('models'))
         self.image = images[random.choice(os.listdir('blocks'))]
         self.orientation = 'up'
@@ -65,7 +66,6 @@ class piece: #the shape you move down the screen
                     print(index, row)
                     if not row in rows_occupied:
                         rows_occupied.append(row)
-        print('Occupied:', len(rows_occupied), 'Model:', len(num_lines))
         if len(rows_occupied) == len(num_lines):
             return True
         return False
@@ -88,12 +88,13 @@ screen_blocks = []
 for x in range(10 * 30): #add blank spaces to screen so that they can be replaced by blocks
     screen_blocks.append(None)
 def play():
-    global canvas
+    global canvas, active_piece
     start_menu.frame.pack_forget()
-    canvas = tk.Canvas(root, bg='snow1', height=20 * 30, width=20 * 10)
+    canvas = tk.Canvas(root, bg='snow1', height=20 * 29 - 2, width=20 * 10) #screen height is 30 but the very bottom row shouldn't be displayed
     canvas.pack()
-    for x in range(11):
+    for x in range(10): #add a bottom row of blocks to make impacting the bottom easier to calculate
         screen_blocks[x] = block()
+    active_piece = piece()
     threading.Thread(target=render_loop).start()
     root.bind('<a>', apply_piece.move.left)
     root.bind('<d>', apply_piece.move.right)
@@ -102,13 +103,14 @@ def play():
 
 def render_loop(): #rerender and move down on a timer
     global active_piece
-    active_piece = piece()
     while True:
-        render()
+        while apply_piece.running:
+            time.sleep(0.01)
+        render.render()
         time.sleep(0.3)
         active_piece.coords[1] -= 1
 
-def render_block(index): #render from a specific index
+def render_block_from_index(index): #render from a specific index
     global screen_blocks
     b = screen_blocks[index]
     if not b == None:
@@ -122,75 +124,101 @@ class render: #uses objects because ... ... ... meh
     def __init__(self):
         self.active = False
     def render(self):
-        if not self.active:
-            self.active = True
+        global active_piece
+        if not self.rendering:
+            self.rendering = True
             for x in range(len(screen_blocks)):
                 b = screen_blocks[x]
                 if not b == None:
                     if b.active:
                         canvas.delete(b.obj)
                         screen_blocks[x] = None
-            send_piece_to_blocks(active_piece)
+            if send_piece_to_blocks(active_piece):
+                while apply_piece.running:
+                    time.sleep(0.01)
+                active_piece.coords[1] += 1
+                for x in range(len(screen_blocks)):
+                    b = screen_blocks[x]
+                    if not b == None:
+                        if b.active:
+                            canvas.delete(b.obj)
+                            screen_blocks[x] = None
+                send_piece_to_blocks(active_piece, block_active=False)
+                active_piece = piece()
             for index in range(len(screen_blocks)):
-                render_block(index)
-            self.active = False
-render = render().render #im giving up on life right now... who cares? if it works, it works *breaks*
+                render_block_from_index(index)
+            self.rendering = False
+    rendering = False
+render = render()
 
-def send_piece_to_blocks(piece):
+def send_piece_to_blocks(piece, block_active=True):
     model = piece.models[piece.orientation]
     start_index = piece.coords[0] + (piece.coords[1] * 10)
+    return_clip = False
     for i in range(len(model)):
         char = model[i]
         if char == '1':
             index = int((start_index + (i % piece.linelen) - int(i / piece.linelen) * 10) % len(screen_blocks))
-            screen_blocks[index] = block(colour=piece.image, active=True)
+            if type(screen_blocks[index]) == block:
+                return_clip = True
+            screen_blocks[index] = block(colour=piece.image, active=block_active)
+    return return_clip
 
 class apply_piece:
     running = False
     class move:
         def left(event):
             global apply_piece
-            if not apply_piece.running:
+            if not apply_piece.running and not render.rendering:
                 apply_piece.running = True
                 active_piece.coords[0] -= 1
-                render()
+                render.render()
                 high, low = active_piece.get_high_low_x()
                 if high == 9:
                     active_piece.coords[0] += 1
-                    render()
+                    render.render()
                 apply_piece.running = False
         def right(event):
-            active_piece.coords[0] += 1
-            render()
-            high, low = active_piece.get_high_low_x()
-            if low == 0:
-                active_piece.coords[0] -= 1
-                render()
+            if not apply_piece.running and not render.rendering:
+                apply_piece.running = True
+                active_piece.coords[0] += 1
+                render.render()
+                high, low = active_piece.get_high_low_x()
+                if low == 0:
+                    active_piece.coords[0] -= 1
+                    render.render()
+                apply_piece.running = False
     class rotate:
         def left(event):
-            index = active_piece.rotations.index(active_piece.orientation) - 1
-            if index < 0:
-                index = len(active_piece.rotations) - 1
-            active_piece.orientation = active_piece.rotations[index]
-            render()
-            if not active_piece.check_sides_ok():
-                index = active_piece.rotations.index(active_piece.orientation) + 1
-                if index > len(active_piece.rotations) - 1:
-                    index = 0
-                active_piece.orientation = active_piece.rotations[index]
-                render()
-        def right(event):
-            index = active_piece.rotations.index(active_piece.orientation) + 1
-            if index > len(active_piece.rotations) - 1:
-                index = 0
-            active_piece.orientation = active_piece.rotations[index]
-            render()
-            if not active_piece.check_sides_ok():
+            if not apply_piece.running and not render.rendering:
+                apply_piece.running = True
                 index = active_piece.rotations.index(active_piece.orientation) - 1
                 if index < 0:
                     index = len(active_piece.rotations) - 1
                 active_piece.orientation = active_piece.rotations[index]
-                render()
+                render.render()
+                if not active_piece.check_sides_ok():
+                    index = active_piece.rotations.index(active_piece.orientation) + 1
+                    if index > len(active_piece.rotations) - 1:
+                        index = 0
+                    active_piece.orientation = active_piece.rotations[index]
+                    render.render()
+                apply_piece.running = False
+        def right(event):
+            if not apply_piece.running and not render.rendering:
+                apply_piece.running = True
+                index = active_piece.rotations.index(active_piece.orientation) + 1
+                if index > len(active_piece.rotations) - 1:
+                    index = 0
+                active_piece.orientation = active_piece.rotations[index]
+                render.render()
+                if not active_piece.check_sides_ok():
+                    index = active_piece.rotations.index(active_piece.orientation) - 1
+                    if index < 0:
+                        index = len(active_piece.rotations) - 1
+                    active_piece.orientation = active_piece.rotations[index]
+                    render.render()
+                apply_piece.running = False
 
 for sub in os.listdir('subsystems'): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
     file = open('subsystems/' + sub, 'r')
