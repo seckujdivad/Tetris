@@ -1,6 +1,6 @@
 global fonts, start_menu, canvas, root, images, screen_blocks, active_piece
 import tkinter as tk
-import os, time, random, math, threading
+import os, time, random, math, threading, sys
 
 root = tk.Tk()
 root.title('Tetris')
@@ -16,15 +16,15 @@ class fonts: #unified fonts/formatting. please use
 
 #load all the images into memory at the same time instead of loading once each time they are needed
 images = {}
-for f in os.listdir('blocks'):
-    images[f] = tk.PhotoImage(file='blocks/' + f)
+for f in os.listdir(sys.path[0] + '/blocks'):
+    images[f] = tk.PhotoImage(file=sys.path[0] + '/blocks/' + f)
 
 #####
 
 class block: #the blocks that everything is made from - "the building blocks of life"
     def __init__(self, colour='random', active=False):
         if colour == 'random':
-            img = images[random.choice(os.listdir('blocks'))]
+            img = images[random.choice(os.listdir(sys.path[0] + '/blocks'))]
         else:
             img = colour
         self.obj = canvas.create_image(-10, -10, image=img) #coords are deliberately offscreen so that they aren't blinking as much in the top corner
@@ -36,11 +36,11 @@ class block: #the blocks that everything is made from - "the building blocks of 
 class piece: #the shape you move down the screen
     def __init__(self, coords=[3, 20]):
         self.coords = coords
-        self.id = random.choice(os.listdir('models'))
-        self.image = images[random.choice(os.listdir('blocks'))]
+        self.id = random.choice(os.listdir(sys.path[0] + '/models'))
+        self.image = images[random.choice(os.listdir(sys.path[0] + '/blocks'))]
         self.orientation = 'up'
-        for model in os.listdir('models/' + self.id):
-            file = open('models/' + self.id + '/' + model, 'r')
+        for model in os.listdir(sys.path[0] + '/models/' + self.id):
+            file = open(sys.path[0] + '/models/' + self.id + '/' + model, 'r')
             m = file.read()
             final_model = ''
             for char in m:
@@ -141,8 +141,8 @@ class render: #uses objects because ... ... ... meh
     rendering = False
 render = render()
 
-for sub in os.listdir('subsystems'): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
-    file = open('subsystems/' + sub, 'r')
+for sub in os.listdir(sys.path[0] + '/subsystems'): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
+    file = open(sys.path[0] + '/subsystems/' + sub, 'r')
     fc = file.read()
     file.close()
     exec(fc)
