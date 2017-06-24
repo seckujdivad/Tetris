@@ -23,6 +23,7 @@ for f in os.listdir(sys.path[0] + '/blocks'):
     sys.stdout.write('{:30}'.format('\r/blocks/' + f))
     images[f] = tk.PhotoImage(file=sys.path[0] + '/blocks/' + f)
 sys.stdout.write('{:30}'.format('\rDone') + '\n')
+del f
 
 #####
 
@@ -93,6 +94,7 @@ class piece: #the shape you move down the screen
 screen_blocks = []
 for x in range(10 * 30): #add blank spaces to screen so that they can be replaced by blocks
     screen_blocks.append(None)
+del x
 def play():
     global canvas, active_piece
     start_menu.frame.pack_forget()
@@ -158,6 +160,7 @@ for sub in os.listdir(sys.path[0] + '/subsystems'): #run all code in subsystems 
     file.close()
     exec(fc)
 sys.stdout.write('{:30}'.format('\rDone') + '\n')
+del fc, sub, file
 
 class start_menu:
     menu_width = 15
