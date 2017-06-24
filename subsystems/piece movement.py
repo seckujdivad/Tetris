@@ -7,7 +7,7 @@ class apply_piece:
                 apply_piece.running = True
                 active_piece.coords[0] -= 1
                 render.render()
-                high, low = active_piece.get_high_low_x()
+                low, high = active_piece.get_high_low_x()
                 if high == 9:
                     active_piece.coords[0] += 1
                     render.render()
@@ -17,7 +17,7 @@ class apply_piece:
                 apply_piece.running = True
                 active_piece.coords[0] += 1
                 render.render()
-                high, low = active_piece.get_high_low_x()
+                low, high = active_piece.get_high_low_x()
                 if low == 0:
                     active_piece.coords[0] -= 1
                     render.render()

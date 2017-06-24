@@ -35,7 +35,7 @@ class block: #the blocks that everything is made from - "the building blocks of 
 
 class piece: #the shape you move down the screen
     def __init__(self, coords=[3, 20]):
-        self.coords = coords
+        self.coords = self.topcoords.copy()
         self.id = random.choice(os.listdir(sys.path[0] + '/models'))
         self.image = images[random.choice(os.listdir(sys.path[0] + '/blocks'))]
         self.orientation = 'up'
@@ -63,7 +63,6 @@ class piece: #the shape you move down the screen
             if not b == None:
                 if b.active:
                     row = int(index / 10)
-                    print(index, row)
                     if not row in rows_occupied:
                         rows_occupied.append(row)
         if len(rows_occupied) == len(num_lines):
@@ -76,9 +75,11 @@ class piece: #the shape you move down the screen
             if not b == None:
                 if b.active:
                     indexes.append(int(index % 10))
+        indexes.sort()
         return indexes[0], indexes[len(indexes) - 1]
     rotations = ['up', 'right', 'down', 'left']
-    coords = [3, 27]
+    coords = [3, 28]
+    topcoords = [4, 29]
     models = {}
     image = None #use the same image resource for all the blocks
 
@@ -106,9 +107,9 @@ def render_loop(): #rerender and move down on a timer
     while True:
         while apply_piece.running:
             time.sleep(0.01)
-        render.render()
-        time.sleep(0.3)
         active_piece.coords[1] -= 1
+        render.render()
+        time.sleep(0.2)
 
 class render: #uses objects because ... ... ... meh
     def __init__(self):
@@ -135,6 +136,7 @@ class render: #uses objects because ... ... ... meh
                             screen_blocks[x] = None
                 send_piece_to_blocks(active_piece, block_active=False)
                 active_piece = piece()
+                active_piece.coords = active_piece.topcoords.copy()
             for index in range(len(screen_blocks)):
                 render_block_from_index(index)
             self.rendering = False
