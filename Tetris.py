@@ -15,9 +15,14 @@ class fonts: #unified fonts/formatting. please use
     overrelief = tk.GROOVE
 
 #load all the images into memory at the same time instead of loading once each time they are needed
+print('Loading images...')
 images = {}
+sys.stdout.write('[...]')
 for f in os.listdir(sys.path[0] + '/blocks'):
+    sys.stdout.flush()
+    sys.stdout.write('{:30}'.format('\r/blocks/' + f))
     images[f] = tk.PhotoImage(file=sys.path[0] + '/blocks/' + f)
+sys.stdout.write('{:30}'.format('\rDone') + '\n')
 
 #####
 
@@ -143,11 +148,16 @@ class render: #uses objects because ... ... ... meh
     rendering = False
 render = render()
 
+print('Loading subsystems...')
+sys.stdout.write('[...]')
 for sub in os.listdir(sys.path[0] + '/subsystems'): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
+    sys.stdout.flush()
+    sys.stdout.write('{:30}'.format('\r/subsystems/' + sub))
     file = open(sys.path[0] + '/subsystems/' + sub, 'r')
     fc = file.read()
     file.close()
     exec(fc)
+sys.stdout.write('{:30}'.format('\rDone') + '\n')
 
 class start_menu:
     menu_width = 15
