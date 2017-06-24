@@ -82,7 +82,10 @@ class piece: #the shape you move down the screen
                 if b.active:
                     indexes.append(int(index % 10))
         indexes.sort()
-        return indexes[0], indexes[len(indexes) - 1]
+        try:
+            return indexes[0], indexes[len(indexes) - 1]
+        except:
+            return 0, 9 #shape not rendered, block all movement
     rotations = ['up', 'right', 'down', 'left']
     coords = [3, 28]
     topcoords = [4, 29]
@@ -121,7 +124,7 @@ def render_loop(): #rerender and move down on a timer
 class render: #uses objects because ... ... ... meh
     def __init__(self):
         self.active = False
-    def render(self):
+    def render(self, movement=None):
         global active_piece
         if not self.rendering:
             self.rendering = True
@@ -132,9 +135,12 @@ class render: #uses objects because ... ... ... meh
                         canvas.delete(b.obj)
                         screen_blocks[x] = None
             if send_piece_to_blocks(active_piece):
-                while apply_piece.running:
-                    time.sleep(0.01)
-                active_piece.coords[1] += 1
+                if movement == None:
+                    active_piece.coords[1] += 1
+                elif movement == 'x+1':
+                    active_piece.coords[0] -= 1
+                elif movement == 'x-1':
+                    active_piece.coords[0] += 1
                 for x in range(len(screen_blocks)):
                     b = screen_blocks[x]
                     if not b == None:

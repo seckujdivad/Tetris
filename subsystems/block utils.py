@@ -18,5 +18,12 @@ def send_piece_to_blocks(piece, block_active=True):
             index = int((start_index + (i % piece.linelen) - int(i / piece.linelen) * 10) % len(screen_blocks))
             if type(screen_blocks[index]) == block:
                 return_clip = True
-            screen_blocks[index] = block(colour=piece.image, active=block_active)
+            else:
+                screen_blocks[index] = block(colour=piece.image, active=block_active)
+    if return_clip:
+        for i in range(len(model)):
+            char = model[i]
+            if char == 1:
+                index = int((start_index + (i % piece.linelen) - int(i / piece.linelen) * 10) % len(screen_blocks))
+                screen_blocks[index] = None
     return return_clip
