@@ -173,6 +173,7 @@ class render: #uses objects because ... ... ... meh
                 active_piece = piece(next_piece)
                 next_piece = make_new_piece_data()
                 previewer.refresh(next_piece)
+                scoring_handler.on_piece_stop()
                 active_piece.coords = active_piece.topcoords.copy()
             for index in range(len(screen_blocks)):
                 render_block_from_index(index)

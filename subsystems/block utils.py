@@ -27,3 +27,42 @@ def send_piece_to_blocks(piece, block_active=True):
                 index = int((start_index + (i % piece.linelen) - int(i / piece.linelen) * 10) % len(screen_blocks))
                 screen_blocks[index] = None
     return return_clip
+
+class scoring:
+    def __init__(self):
+        self.output = tk.Label(game_frame.right, text='- - - -', font=fonts.large)
+        #
+        self.output.pack()
+    def check_complete_rows(self):
+        rows_cleared = 0
+        row_nums = []
+        for index in range(10, len(screen_blocks) - 1, 10):
+            top = index + 10
+            scored = True
+            for sub_index in range(index, top):
+                if screen_blocks[sub_index] == None:
+                    scored = False
+            if scored:
+                rows_cleared += 1
+                row_nums.append(index)
+        return rows_cleared, row_nums
+    def on_piece_stop(self):
+        rows_cleared, row_ids = self.check_complete_rows()
+        if rows_cleared > 0:
+            self.score += [0, 40, 100, 300, 1200][rows_cleared]
+            self.score += self.lines_soft_dropped
+            self.lines_soft_dropped = 0
+            self.score_update()
+            for index in row_ids:
+                bottom = index
+                top = index + 10
+                for sub_index in range(top, bottom, -1):
+                    if not screen_blocks[sub_index] == None:
+                        canvas.delete(screen_blocks[sub_index].obj)
+                    screen_blocks.pop(sub_index)
+                    screen_blocks.append(None)
+    def score_update(self):
+        self.output.config(text=str(self.score))
+    score = 0
+    lines_soft_dropped = 0
+scoring_handler = scoring()
