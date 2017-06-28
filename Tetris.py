@@ -1,4 +1,4 @@
-global fonts, start_menu, canvas, root, images, screen_blocks, active_piece, game_frame, next_piece, drop
+global fonts, start_menu, canvas, root, images, screen_blocks, active_piece, game_frame, next_piece, drop, paths
 import tkinter as tk
 import os, time, random, math, threading, sys
 
@@ -14,6 +14,12 @@ class game_frame:
     left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
+class paths:
+    assets = sys.path[0] + '/assets/'
+    blocks = assets + 'blocks/'
+    models = assets + 'models/'
+    subsystems = sys.path[0] + '/subsystems/'
+
 class fonts: #unified fonts/formatting. please use
     face = ''
     title = (face, 50)
@@ -27,10 +33,10 @@ class fonts: #unified fonts/formatting. please use
 print('Loading images...')
 images = {}
 sys.stdout.write('[...]')
-for f in os.listdir(sys.path[0] + '/blocks'):
+for f in os.listdir(paths.blocks):
     sys.stdout.flush()
-    sys.stdout.write('{:30}'.format('\r/blocks/' + f))
-    images[f] = tk.PhotoImage(file=sys.path[0] + '/blocks/' + f)
+    sys.stdout.write('{:30}'.format('\r' + f))
+    images[f] = tk.PhotoImage(file=paths.blocks + f)
 sys.stdout.write('{:30}'.format('\rDone') + '\n')
 del f
 
@@ -39,7 +45,7 @@ del f
 class block: #the blocks that everything is made from - "the building blocks of life"
     def __init__(self, colour='random', active=False):
         if colour == 'random':
-            img = images[random.choice(os.listdir(sys.path[0] + '/blocks'))]
+            img = images[random.choice(os.listdir(paths.blocks))]
         else:
             img = colour
         self.obj = canvas.create_image(-10, -10, image=img) #coords are deliberately offscreen so that they aren't blinking as much in the top corner
@@ -53,8 +59,8 @@ class piece: #the shape you move down the screen
         self.coords = self.topcoords.copy()
         self.id = data['id']
         self.image = data['image']
-        for model in os.listdir(sys.path[0] + '/models/' + self.id):
-            file = open(sys.path[0] + '/models/' + self.id + '/' + model, 'r')
+        for model in os.listdir(paths.models + self.id):
+            file = open(paths.models + self.id + '/' + model, 'r')
             m = file.read()
             final_model = ''
             for char in m:
@@ -127,8 +133,8 @@ def play():
 
 def make_new_piece_data():
     piece_data = {}
-    piece_data['id'] = random.choice(os.listdir(sys.path[0] + '/models'))
-    piece_data['image'] = images[random.choice(os.listdir(sys.path[0] + '/blocks'))]
+    piece_data['id'] = random.choice(os.listdir(paths.models))
+    piece_data['image'] = images[random.choice(os.listdir(paths.blocks))]
     return piece_data
 
 def render_loop(): #rerender and move down on a timer
@@ -184,10 +190,10 @@ render = render()
 
 print('Loading subsystems...')
 sys.stdout.write('[...]')
-for sub in os.listdir(sys.path[0] + '/subsystems'): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
+for sub in os.listdir(paths.subsystems): #run all code in subsystems folder, makes it moddable if modded tetris is the sort of thing you're into
     sys.stdout.flush()
-    sys.stdout.write('{:30}'.format('\r/subsystems/' + sub))
-    file = open(sys.path[0] + '/subsystems/' + sub, 'r')
+    sys.stdout.write('{:30}'.format('\r' + sub))
+    file = open(paths.subsystems + sub, 'r')
     fc = file.read()
     file.close()
     exec(fc)

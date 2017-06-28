@@ -10,7 +10,7 @@ class preview:
             self.canvas.delete(object)
         self.objects = []
         #
-        file = open(sys.path[0] + '/models/' + data['id'] + '/up.txt', 'r')
+        file = open(paths.models + data['id'] + '/up.txt', 'r')
         raw_fc = file.read()
         file.close()
         fc = ''
