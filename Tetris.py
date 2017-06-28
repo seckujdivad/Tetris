@@ -6,13 +6,6 @@ drop = False
 
 root = tk.Tk()
 root.title('Tetris')
-class game_frame:
-    frame = tk.Frame(root)
-    left = tk.Frame(frame)
-    right = tk.Frame(frame)
-    #
-    left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
 class paths:
     assets = sys.path[0] + '/assets/'
@@ -28,6 +21,16 @@ class fonts: #unified fonts/formatting. please use
     #formatting
     relief = tk.FLAT
     overrelief = tk.GROOVE
+
+class game_frame:
+    frame = tk.Frame(root)
+    left = tk.Frame(frame)
+    right = tk.Frame(frame)
+    go_back = tk.Button(right, text='Exit', font=fonts.normal)
+    #
+    go_back.pack(side=tk.BOTTOM, fill=tk.X, expand=True)
+    left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
 #load all the images into memory at the same time instead of loading once each time they are needed
 print('Loading images...')
@@ -107,13 +110,12 @@ class piece: #the shape you move down the screen
     orientation = 'up'
 
 #####
-
-screen_blocks = []
-for x in range(10 * 30): #add blank spaces to screen so that they can be replaced by blocks
-    screen_blocks.append(None)
-del x
 def play():
-    global canvas, active_piece, next_piece
+    global canvas, active_piece, next_piece, screen_blocks
+    screen_blocks = []
+    for x in range(10 * 30): #add blank spaces to screen so that they can be replaced by blocks
+        screen_blocks.append(None)
+    del x
     start_menu.frame.pack_forget()
     canvas = tk.Canvas(game_frame.left, bg='snow1', height=20 * 29 - 2, width=20 * 10) #screen height is 30 but the very bottom row shouldn't be displayed
     canvas.pack()
@@ -130,6 +132,12 @@ def play():
     root.bind('<e>', apply_piece.rotate.right)
     root.bind('<KeyPress>', apply_piece.drop)
     root.bind('<KeyRelease>', apply_piece.undrop)
+
+def stop_playing():
+    game_frame.frame.pack_forget()
+    canvas.destroy()
+    start_menu.frame.pack()
+game_frame.go_back.config(command=stop_playing)
 
 def make_new_piece_data():
     piece_data = {}
@@ -206,7 +214,7 @@ class start_menu:
     title = tk.Label(frame, text='Tetris', font=fonts.title)
     play_game = tk.Button(frame, text='Play', font=fonts.large, width=menu_width, command=play, relief=fonts.relief, overrelief=fonts.overrelief)
     leaderboard = tk.Button(frame, text='Leaderboard', font=fonts.large, width=menu_width, relief=fonts.relief, overrelief=fonts.overrelief, command=leaderboard.show_leaderboard)
-    settings = tk.Button(frame, text='Settings', font=fonts.large, width=menu_width, relief=fonts.relief, overrelief=fonts.overrelief)
+    settings = tk.Button(frame, text='Settings', font=fonts.large, width=menu_width, relief=fonts.relief, overrelief=fonts.overrelief, command=settings.show_settings)
     #
     title.pack(fill=tk.X)
     play_game.pack(fill=tk.X)
