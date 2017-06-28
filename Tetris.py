@@ -1,6 +1,8 @@
-global fonts, start_menu, canvas, root, images, screen_blocks, active_piece, game_frame, next_piece
+global fonts, start_menu, canvas, root, images, screen_blocks, active_piece, game_frame, next_piece, drop
 import tkinter as tk
 import os, time, random, math, threading, sys
+
+drop = False
 
 root = tk.Tk()
 root.title('Tetris')
@@ -120,6 +122,8 @@ def play():
     root.bind('<d>', apply_piece.move.right)
     root.bind('<q>', apply_piece.rotate.left)
     root.bind('<e>', apply_piece.rotate.right)
+    root.bind('<KeyPress>', apply_piece.drop)
+    root.bind('<KeyRelease>', apply_piece.undrop)
 
 def make_new_piece_data():
     piece_data = {}
@@ -134,7 +138,10 @@ def render_loop(): #rerender and move down on a timer
             time.sleep(0.01)
         active_piece.coords[1] -= 1
         render.render()
-        time.sleep(0.2)
+        if drop:
+            time.sleep(0.01)
+        else:
+            time.sleep(0.2)
 
 class render: #uses objects because ... ... ... meh
     def __init__(self):

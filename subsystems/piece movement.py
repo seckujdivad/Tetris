@@ -53,3 +53,11 @@ class apply_piece:
                     active_piece.orientation = active_piece.rotations[index]
                     render.render()
                 apply_piece.running = False
+    def drop(event):
+        global drop
+        if event.keysym == 's':
+            drop = True
+    def undrop(event):
+        global drop
+        if event.keysym == 's':
+            drop = False
