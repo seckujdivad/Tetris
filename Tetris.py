@@ -1,9 +1,16 @@
-global fonts, start_menu, canvas, root, images, screen_blocks, active_piece
+global fonts, start_menu, canvas, root, images, screen_blocks, active_piece, game_frame, next_piece
 import tkinter as tk
 import os, time, random, math, threading, sys
 
 root = tk.Tk()
 root.title('Tetris')
+class game_frame:
+    frame = tk.Frame(root)
+    left = tk.Frame(frame)
+    right = tk.Frame(frame)
+    #
+    left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
 class fonts: #unified fonts/formatting. please use
     face = ''
@@ -40,11 +47,10 @@ class block: #the blocks that everything is made from - "the building blocks of 
     active = None
 
 class piece: #the shape you move down the screen
-    def __init__(self, coords=[3, 20]):
+    def __init__(self, data):
         self.coords = self.topcoords.copy()
-        self.id = random.choice(os.listdir(sys.path[0] + '/models'))
-        self.image = images[random.choice(os.listdir(sys.path[0] + '/blocks'))]
-        self.orientation = 'up'
+        self.id = data['id']
+        self.image = data['image']
         for model in os.listdir(sys.path[0] + '/models/' + self.id):
             file = open(sys.path[0] + '/models/' + self.id + '/' + model, 'r')
             m = file.read()
@@ -87,10 +93,10 @@ class piece: #the shape you move down the screen
         except:
             return 0, 9 #shape not rendered, block all movement
     rotations = ['up', 'right', 'down', 'left']
-    coords = [3, 28]
     topcoords = [4, 29]
     models = {}
     image = None #use the same image resource for all the blocks
+    orientation = 'up'
 
 #####
 
@@ -99,18 +105,27 @@ for x in range(10 * 30): #add blank spaces to screen so that they can be replace
     screen_blocks.append(None)
 del x
 def play():
-    global canvas, active_piece
+    global canvas, active_piece, next_piece
     start_menu.frame.pack_forget()
-    canvas = tk.Canvas(root, bg='snow1', height=20 * 29 - 2, width=20 * 10) #screen height is 30 but the very bottom row shouldn't be displayed
+    canvas = tk.Canvas(game_frame.left, bg='snow1', height=20 * 29 - 2, width=20 * 10) #screen height is 30 but the very bottom row shouldn't be displayed
     canvas.pack()
+    game_frame.frame.pack()
     for x in range(10): #add a bottom row of blocks to make impacting the bottom easier to calculate
         screen_blocks[x] = block()
-    active_piece = piece()
+    active_piece = piece(data=make_new_piece_data())
+    next_piece = make_new_piece_data()
+    previewer.refresh(next_piece)
     threading.Thread(target=render_loop).start()
     root.bind('<a>', apply_piece.move.left)
     root.bind('<d>', apply_piece.move.right)
     root.bind('<q>', apply_piece.rotate.left)
     root.bind('<e>', apply_piece.rotate.right)
+
+def make_new_piece_data():
+    piece_data = {}
+    piece_data['id'] = random.choice(os.listdir(sys.path[0] + '/models'))
+    piece_data['image'] = images[random.choice(os.listdir(sys.path[0] + '/blocks'))]
+    return piece_data
 
 def render_loop(): #rerender and move down on a timer
     global active_piece
@@ -125,7 +140,7 @@ class render: #uses objects because ... ... ... meh
     def __init__(self):
         self.active = False
     def render(self, movement=None):
-        global active_piece
+        global active_piece, next_piece
         if not self.rendering:
             self.rendering = True
             for x in range(len(screen_blocks)):
@@ -148,7 +163,9 @@ class render: #uses objects because ... ... ... meh
                             canvas.delete(b.obj)
                             screen_blocks[x] = None
                 send_piece_to_blocks(active_piece, block_active=False)
-                active_piece = piece()
+                active_piece = piece(next_piece)
+                next_piece = make_new_piece_data()
+                previewer.refresh(next_piece)
                 active_piece.coords = active_piece.topcoords.copy()
             for index in range(len(screen_blocks)):
                 render_block_from_index(index)
