@@ -140,6 +140,7 @@ def render_loop(): #rerender and move down on a timer
         render.render()
         if drop:
             time.sleep(0.01)
+            scoring_handler.lines_soft_dropped += 1
         else:
             time.sleep(0.2)
 
