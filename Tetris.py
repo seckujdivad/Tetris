@@ -206,10 +206,12 @@ class start_menu:
     title = tk.Label(frame, text='Tetris', font=fonts.title)
     play_game = tk.Button(frame, text='Play', font=fonts.large, width=menu_width, command=play, relief=fonts.relief, overrelief=fonts.overrelief)
     leaderboard = tk.Button(frame, text='Leaderboard', font=fonts.large, width=menu_width, relief=fonts.relief, overrelief=fonts.overrelief, command=leaderboard.show_leaderboard)
+    settings = tk.Button(frame, text='Settings', font=fonts.large, width=menu_width, relief=fonts.relief, overrelief=fonts.overrelief)
     #
     title.pack(fill=tk.X)
     play_game.pack(fill=tk.X)
     leaderboard.pack(fill=tk.X)
+    settings.pack(fill=tk.X)
     frame.pack()
 
 root.mainloop()
