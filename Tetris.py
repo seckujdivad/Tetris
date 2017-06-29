@@ -126,17 +126,15 @@ def play():
     next_piece = make_new_piece_data()
     previewer.refresh(next_piece)
     threading.Thread(target=render_loop).start()
-    root.bind('<a>', apply_piece.move.left)
-    root.bind('<d>', apply_piece.move.right)
-    root.bind('<q>', apply_piece.rotate.left)
-    root.bind('<e>', apply_piece.rotate.right)
-    root.bind('<KeyPress>', apply_piece.drop)
-    root.bind('<KeyRelease>', apply_piece.undrop)
+    for keysym in apply_piece.bindings:
+        root.bind(keysym, apply_piece.bindings[keysym])
 
 def stop_playing():
     game_frame.frame.pack_forget()
     canvas.destroy()
     start_menu.frame.pack()
+    for keysym in apply_piece.bindings:
+        root.unbind(keysym)
 game_frame.go_back.config(command=stop_playing)
 
 def make_new_piece_data():

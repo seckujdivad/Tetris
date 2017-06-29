@@ -61,3 +61,5 @@ class apply_piece:
         global drop
         if event.keysym == 's':
             drop = False
+apply_piece.bindings = {'<a>':apply_piece.move.left, '<d>':apply_piece.move.right, '<q>':apply_piece.rotate.left, '<e>':apply_piece.rotate.right,
+                        '<KeyPress>':apply_piece.drop, '<KeyRelease>':apply_piece.undrop}
