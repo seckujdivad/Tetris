@@ -222,7 +222,7 @@ class start_menu:
     settings.pack(fill=tk.X)
     frame.pack()
 
-    def music_player(): #added by jack, work in progress, only plays one song for now
+def music_player(): #added by jack, work in progress, only plays one song for now
 ##    winsound.PlaySound("assets/sounds/level 1.WAV", winsound.SND_FILENAME | winsound.SND_ASYNC)
 ##    if music_number > 180:
     winsound.PlaySound("assets/sounds/level 4.WAV", winsound.SND_FILENAME | winsound.SND_ASYNC)
