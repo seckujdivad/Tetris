@@ -1,6 +1,6 @@
 global fonts, start_menu, canvas, root, images, screen_blocks, active_piece, game_frame, next_piece, drop, paths
 import tkinter as tk
-import os, time, random, math, threading, sys
+import os, time, random, math, threading, sys, winsound
 
 drop = False
 
@@ -126,10 +126,12 @@ def play():
     next_piece = make_new_piece_data()
     previewer.refresh(next_piece)
     threading.Thread(target=render_loop, daemon=True).start()
+    music_player()
     for keysym in apply_piece.bindings:
         root.bind(keysym, apply_piece.bindings[keysym])
 
 def stop_playing():
+    winsound.PlaySound(None, winsound.SND_ASYNC)
     game_frame.frame.pack_forget()
     canvas.destroy()
     start_menu.frame.pack()
@@ -219,5 +221,14 @@ class start_menu:
     leaderboard.pack(fill=tk.X)
     settings.pack(fill=tk.X)
     frame.pack()
+
+    def music_player(): #added by jack, work in progress, only plays one song for now
+##    winsound.PlaySound("assets/sounds/level 1.WAV", winsound.SND_FILENAME | winsound.SND_ASYNC)
+##    if music_number > 180:
+    winsound.PlaySound("assets/sounds/level 4.WAV", winsound.SND_FILENAME | winsound.SND_ASYNC)
+##    elif music_number > 120:
+##        winsound.PlaySound("assets/sounds/level 3.WAV", winsound.SND_FILENAME | winsound.SND_ASYNC)
+##    elif music_number > 60:
+##        winsound.PlaySound("assets/sounds/level 2.WAV", winsound.SND_FILENAME | winsound.SND_ASYNC)
 
 root.mainloop()
