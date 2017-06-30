@@ -26,9 +26,9 @@ class game_frame:
     frame = tk.Frame(root)
     left = tk.Frame(frame)
     right = tk.Frame(frame)
-    go_back = tk.Button(right, text='Exit', font=fonts.normal)
+    go_back = tk.Button(right, text='Exit', font=fonts.normal, relief=fonts.relief)
     #
-    go_back.pack(side=tk.BOTTOM, fill=tk.X, expand=True)
+    go_back.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
     left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
@@ -125,7 +125,7 @@ def play():
     active_piece = piece(data=make_new_piece_data())
     next_piece = make_new_piece_data()
     previewer.refresh(next_piece)
-    threading.Thread(target=render_loop).start()
+    threading.Thread(target=render_loop, daemon=True).start()
     for keysym in apply_piece.bindings:
         root.bind(keysym, apply_piece.bindings[keysym])
 
