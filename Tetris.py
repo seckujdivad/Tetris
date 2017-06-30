@@ -1,6 +1,6 @@
 global fonts, start_menu, canvas, root, images, screen_blocks, active_piece, game_frame, next_piece, drop, paths
 import tkinter as tk
-import os, time, random, math, threading, sys, winsound
+import os, time, random, math, threading, sys, winsound 
 
 drop = False
 
