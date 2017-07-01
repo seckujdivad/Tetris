@@ -12,6 +12,9 @@ class paths:
     blocks = assets + 'blocks/'
     models = assets + 'models/'
     subsystems = sys.path[0] + '/subsystems/'
+    debug = sys.path[0] + '/debug/'
+if not os.path.isdir(paths.debug): #add file for logs or list dumps - should be in gitignore
+    os.mkdir(paths.debug)
 
 class fonts: #unified fonts/formatting. please use
     face = ''
