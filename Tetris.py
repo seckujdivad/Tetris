@@ -65,6 +65,7 @@ class piece: #the shape you move down the screen
         self.coords = self.topcoords.copy()
         self.id = data['id']
         self.image = data['image']
+        self.last_blocks = []
         for model in os.listdir(paths.models + self.id):
             file = open(paths.models + self.id + '/' + model, 'r')
             m = file.read()
@@ -76,38 +77,18 @@ class piece: #the shape you move down the screen
             file.close()
         self.linelen = math.sqrt(len(self.models[self.orientation]))
     def check_sides_ok(self):
-        num_lines = []
-        sum_index = 0
+        sides = [False, False]
         for index in range(len(self.models[self.orientation])):
-            char = self.models[self.orientation][index]
-            if char == '1':
-                if not int(index / self.linelen) in num_lines:
-                    num_lines.append(int(index / self.linelen))
-        rows_occupied = []
-        for index in range(len(screen_blocks)):
-            b = screen_blocks[index]
-            if not b == None:
-                if b.active:
-                    row = int(index / 10)
-                    if not row in rows_occupied:
-                        rows_occupied.append(row)
-        if len(rows_occupied) == len(num_lines):
-            return True
-        return False
-    def get_high_low_x(self):
-        indexes = []
-        for index in range(len(screen_blocks)):
-            b = screen_blocks[index]
-            if not b == None:
-                if b.active:
-                    indexes.append(int(index % 10))
-        indexes.sort()
-        try:
-            return indexes[0], indexes[len(indexes) - 1]
-        except:
-            return 0, 9 #shape not rendered, block all movement
+            if self.models[self.orientation][index] == '1':
+                x = self.coords[0] + int(index % self.linelen)
+                y = self.coords[1] + int(index / self.linelen)
+                if x < 0:
+                    sides[0] = True
+                elif x > 9:
+                    sides[1] = True
+        return sides
     rotations = ['up', 'right', 'down', 'left']
-    topcoords = [4, 29]
+    topcoords = [4, 1]
     models = {}
     image = None #use the same image resource for all the blocks
     orientation = 'up'
@@ -116,15 +97,17 @@ class piece: #the shape you move down the screen
 def play():
     global canvas, active_piece, next_piece, screen_blocks
     screen_blocks = []
-    for x in range(10 * 30): #add blank spaces to screen so that they can be replaced by blocks
-        screen_blocks.append(None)
-    del x
+    single_row = []
+    for i in range(10):
+        single_row.append(None)
+    for y in range(30):
+        screen_blocks.append(single_row.copy())
     start_menu.frame.pack_forget()
     canvas = tk.Canvas(game_frame.left, bg='snow1', height=20 * 29 - 2, width=20 * 10) #screen height is 30 but the very bottom row shouldn't be displayed
     canvas.pack()
     game_frame.frame.pack()
-    for x in range(10): #add a bottom row of blocks to make impacting the bottom easier to calculate
-        screen_blocks[x] = block()
+    for i in range(10):
+        screen_blocks[29][i] = block()
     active_piece = piece(data=make_new_piece_data())
     next_piece = make_new_piece_data()
     previewer.refresh(next_piece)
@@ -132,6 +115,36 @@ def play():
     music_player()
     for keysym in apply_piece.bindings:
         root.bind(keysym, apply_piece.bindings[keysym])
+
+def display_screen_as_text(event=None): #debug tool to print screen_blocks
+    try:
+        text = 'screen_blocks dump:\n\t'
+        for i in range(10):
+            text += str(i) + '\t\t'
+        for i in range(len(screen_blocks)):
+            text += '\n' + str(i) + '\t'
+            for item in screen_blocks[i]:
+                if type(item) == block:
+                    text += 'block'
+                elif type(item) == None:
+                    text += '[]'
+                else:
+                    text += str(item)
+                text += '\t'
+    except:
+        text = 'Error!\n' + str(screen_blocks)
+        print('Error!')
+    file = open(paths.debug + 'screen_blocks dump.txt', 'w')
+    file.write(text)
+    file.close()
+root.bind('<Control-F1>', display_screen_as_text)
+
+def on_piece_stop():
+    global active_piece, next_piece
+    scoring_handler.on_piece_stop()
+    active_piece = piece(data=next_piece)
+    next_piece = make_new_piece_data()
+    previewer.refresh(next_piece)
 
 def stop_playing():
     winsound.PlaySound(None, winsound.SND_ASYNC)
@@ -153,7 +166,7 @@ def render_loop(): #rerender and move down on a timer
     while True:
         while apply_piece.running:
             time.sleep(0.01)
-        active_piece.coords[1] -= 1
+        active_piece.coords[1] += 1
         render.render()
         if drop:
             time.sleep(0.01)
@@ -168,33 +181,10 @@ class render: #uses objects because ... ... ... meh
         global active_piece, next_piece
         if not self.rendering:
             self.rendering = True
-            for x in range(len(screen_blocks)):
-                b = screen_blocks[x]
-                if not b == None:
-                    if b.active:
-                        canvas.delete(b.obj)
-                        screen_blocks[x] = None
-            if send_piece_to_blocks(active_piece):
-                if movement == None:
-                    active_piece.coords[1] += 1
-                elif movement == 'x+1':
-                    active_piece.coords[0] -= 1
-                elif movement == 'x-1':
-                    active_piece.coords[0] += 1
-                for x in range(len(screen_blocks)):
-                    b = screen_blocks[x]
-                    if not b == None:
-                        if b.active:
-                            canvas.delete(b.obj)
-                            screen_blocks[x] = None
-                send_piece_to_blocks(active_piece, block_active=False)
-                active_piece = piece(next_piece)
-                next_piece = make_new_piece_data()
-                previewer.refresh(next_piece)
-                scoring_handler.on_piece_stop()
-                active_piece.coords = active_piece.topcoords.copy()
-            for index in range(len(screen_blocks)):
-                render_block_from_index(index)
+            send_piece_to_blocks(active_piece, move=movement)
+            for y in range(len(screen_blocks)):
+                for x in range(10):
+                    render_block_from_coords(x, y)
             self.rendering = False
     rendering = False
 render = render()
