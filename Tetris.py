@@ -1,6 +1,7 @@
 global fonts, start_menu, canvas, root, images, screen_blocks, active_piece, game_frame, next_piece, drop, paths
 import tkinter as tk
-import os, time, random, math, threading, sys, winsound 
+import os, time, random, math, threading, sys, winsound, shutil, sqlite3
+#shutil is to copy files without using os.system. Executing commands is disabled at school
 
 drop = False
 
@@ -16,11 +17,15 @@ class paths:
 if not os.path.isdir(paths.debug): #add file for logs or list dumps - should be in gitignore
     os.mkdir(paths.debug)
 
+if not os.path.isfile('persistent.db'): #copy through a database
+    shutil.copyfile(paths.assets + 'persistent_default.db', 'persistent.db')
+
 class fonts: #unified fonts/formatting. please use
     face = ''
     title = (face, 50)
     large = (face, 25)
     normal = (face, 14)
+    small = (face, 11)
     #formatting
     relief = tk.FLAT
     overrelief = tk.GROOVE
