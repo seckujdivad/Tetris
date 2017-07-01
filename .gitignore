@@ -4,6 +4,9 @@ debug/
 *.py[cod]
 *$py.class
 
+# Files
+persistent.db
+
 # C extensions
 *.so
 
@@ -138,4 +141,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-persistent.db
