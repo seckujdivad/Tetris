@@ -19,7 +19,6 @@ class settings:
         #
         self.item.interact.music_on.pack(anchor='nw', fill=tk.X, expand=True)
         self.item.interact.reset.pack(anchor='nw', fill=tk.X, expand=True)
-        
         #
         self.title.pack(fill=tk.X)
         self.left.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
@@ -29,10 +28,14 @@ class settings:
         #get all
         for var in self.values:
             self.values[var].set(self.get_data(var))
+        #
+        root.bind('<Control-F2>', self.on_update)
+        root.bind('<Control-F3>', self.reset)
     def show_settings(self):
         start_menu.frame.pack_forget()
         self.frame.pack()
     def hide_settings(self):
+        self.on_update()
         self.frame.pack_forget()
         start_menu.frame.pack()
     class item:
@@ -44,6 +47,11 @@ class settings:
         self.data.close()
         reset_persistent()
         self.data = sqlite3.connect(paths.persistent + 'persistent.db')
+    def on_update(self, event=None):
+        if not self.values == self.prev_values:
+            for key in self.values:
+                self.write_data(key, self.values[key].get())
+            self.prev_values = self.values.copy()
     def get_data(self, name):
         cursor = self.data.execute('SELECT name, data FROM settings')
         all = cursor.fetchall()
@@ -51,8 +59,9 @@ class settings:
             if id == name:
                 return val
     def write_data(self, key, value):
-        self.data.execute('DELETE FROM settings WHERE name = ' + key)
-        self.data.execute('INSERT INTO settings VALUES ("' + key + '", "' + value + '")')
+        self.data.execute('DELETE FROM settings WHERE name = "' + key + '"')
+        self.data.execute('INSERT INTO settings (name, data) VALUES ("' + key + '","' + value + '")')
         self.data.commit()
     values = {'music':tk.StringVar()}
+    prev_values = {}
 settings = settings()
