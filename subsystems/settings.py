@@ -1,6 +1,6 @@
 class settings:
     def __init__(self): #set out objects inside the frame
-        self.data = sqlite3.connect('persistent.db')
+        self.data = sqlite3.connect(paths.persistent + 'persistent.db')
         self.frame = tk.Frame(root)
         self.title = tk.Label(self.frame, text='Settings', font=fonts.title)
         self.backbutton = tk.Button(self.frame, text='Return to Menu', font=fonts.normal, command=self.hide_settings, relief=fonts.relief, overrelief=fonts.overrelief)
@@ -41,14 +41,18 @@ class settings:
         class interact:
             pass
     def reset(self):
-        shutil.copyfile(paths.assets + 'persistent_default.db', 'persistent.db')
+        self.data.close()
+        reset_persistent()
+        self.data = sqlite3.connect(paths.persistent + 'persistent.db')
     def get_data(self, name):
         cursor = self.data.execute('SELECT name, data FROM settings')
         all = cursor.fetchall()
         for id, val in all:
             if id == name:
                 return val
-    def write_data(self):
-        pass
+    def write_data(self, key, value):
+        self.data.execute('DELETE FROM settings WHERE name = ' + key)
+        self.data.execute('INSERT INTO settings VALUES ("' + key + '", "' + value + '")')
+        self.data.commit()
     values = {'music':tk.StringVar()}
 settings = settings()
