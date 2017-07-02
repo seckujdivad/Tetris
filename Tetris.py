@@ -179,8 +179,10 @@ def render_loop(): #rerender and move down on a timer
             time.sleep(0.2)
 
 def reset_persistent():
-    if not os.path.isdir(paths.persistent): #copy through a database
-        os.mkdir(paths.persistent)
+    if os.path.isdir(paths.persistent): #copy through a database
+        shutil.rmtree(paths.persistent)
+    time.sleep(0.2)
+    os.mkdir(paths.persistent)
     for file in os.listdir(paths.persistent_template):
         shutil.copy(paths.persistent_template + file, paths.persistent + file)
 
