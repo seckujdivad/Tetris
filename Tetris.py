@@ -13,12 +13,11 @@ class paths:
     blocks = assets + 'blocks/'
     models = assets + 'models/'
     subsystems = sys.path[0] + '/subsystems/'
+    persistent_template = assets + '/persistent template/'
+    persistent = sys.path[0] + '/persistent/'
     debug = sys.path[0] + '/debug/'
 if not os.path.isdir(paths.debug): #add file for logs or list dumps - should be in gitignore
     os.mkdir(paths.debug)
-
-if not os.path.isfile('persistent.db'): #copy through a database
-    shutil.copyfile(paths.assets + 'persistent_default.db', 'persistent.db')
 
 class fonts: #unified fonts/formatting. please use
     face = ''
@@ -179,6 +178,12 @@ def render_loop(): #rerender and move down on a timer
         else:
             time.sleep(0.2)
 
+def reset_persistent():
+    if not os.path.isdir(paths.persistent): #copy through a database
+        os.mkdir(paths.persistent)
+    for file in os.listdir(paths.persistent_template):
+        shutil.copy(paths.persistent_template + file, paths.persistent + file)
+
 class render: #uses objects because ... ... ... meh
     def __init__(self):
         self.active = False
@@ -193,6 +198,9 @@ class render: #uses objects because ... ... ... meh
             self.rendering = False
     rendering = False
 render = render()
+
+if not os.path.isdir(paths.persistent):
+    reset_persistent()
 
 print('Loading subsystems...')
 sys.stdout.write('[...]')
