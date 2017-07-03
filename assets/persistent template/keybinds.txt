@@ -1,0 +1,13 @@
+#Movement
+drop:['s']:0.01
+
+move left:['a']:0.1
+move right:['d']:0.1
+
+rotate left:['q']:0.2
+rotate right:['e']:0.2
+
+#Debug
+screen image:['Control_L', 'F1']:1
+force commit settings:['Control_L', 'F2']:1
+reset settings:['Control_L', 'F3']:1

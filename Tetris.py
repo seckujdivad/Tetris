@@ -115,12 +115,11 @@ def play():
     active_piece = piece(data=make_new_piece_data())
     next_piece = make_new_piece_data()
     previewer.refresh(next_piece)
-    threading.Thread(target=render_loop, daemon=True).start()
+    threading.Thread(target=render.render_loop, daemon=True).start()
     music_player()
-    for keysym in apply_piece.bindings:
-        root.bind(keysym, apply_piece.bindings[keysym])
 
 def display_screen_as_text(event=None): #debug tool to print screen_blocks
+    print('Writing screen_blocks...')
     try:
         text = 'screen_blocks dump:\n\t'
         for i in range(10):
@@ -136,12 +135,15 @@ def display_screen_as_text(event=None): #debug tool to print screen_blocks
                     text += str(item)
                 text += '\t'
     except:
-        text = 'Error!\n' + str(screen_blocks)
+        try:
+            text = 'Error!\n' + str(screen_blocks)
+        except NameError:
+            text = 'Error!'
         print('Error!')
     file = open(paths.debug + 'screen_blocks dump.txt', 'w')
     file.write(text)
     file.close()
-root.bind('<Control-F1>', display_screen_as_text)
+    print('Wrote screen_blocks')
 
 def on_piece_stop():
     global active_piece, next_piece
@@ -155,8 +157,6 @@ def stop_playing():
     game_frame.frame.pack_forget()
     canvas.destroy()
     start_menu.frame.pack()
-    for keysym in apply_piece.bindings:
-        root.unbind(keysym)
 game_frame.go_back.config(command=stop_playing)
 
 def make_new_piece_data():
@@ -164,19 +164,6 @@ def make_new_piece_data():
     piece_data['id'] = random.choice(os.listdir(paths.models))
     piece_data['image'] = images[random.choice(os.listdir(paths.blocks))]
     return piece_data
-
-def render_loop(): #rerender and move down on a timer
-    global active_piece
-    while True:
-        while apply_piece.running:
-            time.sleep(0.01)
-        active_piece.coords[1] += 1
-        render.render()
-        if drop:
-            time.sleep(0.01)
-            scoring_handler.lines_soft_dropped += 1
-        else:
-            time.sleep(0.2)
 
 def reset_persistent():
     if os.path.isdir(paths.persistent): #copy through a database
@@ -198,6 +185,16 @@ class render: #uses objects because ... ... ... meh
                 for x in range(10):
                     render_block_from_coords(x, y)
             self.rendering = False
+    def tick(self):
+        active_piece.coords[1] += 1
+        self.render()
+    def render_loop(self): #rerender and move down on a timer
+        global active_piece
+        while True:
+            while apply_piece.running:
+                time.sleep(0.01)
+            self.tick()
+            time.sleep(0.2)   
     rendering = False
 render = render()
 
